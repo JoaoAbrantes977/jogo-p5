@@ -28,6 +28,7 @@ let validShopArray = [];
 let sementesValid=false;
 let countByType = {};
 let countCampo = 0;
+let countCampoValid = 0;
 
 let lvl1 = 675;
 let lvl2 = 2040;
@@ -37,7 +38,6 @@ let lvl5 = 10485;
 let lvl6 = 13150;
 let lvl7 = 20020;
 let lvl8 = 26220;
-
 
 function preload(){
   img=loadImage('LogoJogoWeb.jpg');
@@ -83,60 +83,30 @@ function mousePressed(x,y){
     shopValid = false;
     console.log("Saiu na Shop")
   }else if(campoBtn.on_Click(mouseX,mouseY) && (scene==4)){
-
-    let countCampo = 0;
-    for (let i = 0; i < buildingsPlayer.length; i++) {
-      if (buildingsPlayer[i].type === 'Campo') {
-        countCampo++;
-        console.log("countCampo - " + countCampo)
-      }
-    }
-    
-
-    //não está certo, ele permite sempre desenhar
-    if((playerXP[0].Xp < lvl1) && (countCampo < 4)){
+    if (
+      (playerXP[0].Xp < lvl1 && countCampo === 4) ||
+      (playerXP[0].Xp < lvl2 && countCampo === 6) ||
+      (playerXP[0].Xp < lvl3 && countCampo === 8) ||
+      (playerXP[0].Xp < lvl4 && countCampo === 10) ||
+      (playerXP[0].Xp < lvl5 && countCampo === 12) ||
+      (playerXP[0].Xp < lvl6 && countCampo === 14) ||
+      (playerXP[0].Xp < lvl7 && countCampo === 16) ||
+      (playerXP[0].Xp < lvl8 && countCampo === 20)
+    ) {
+      boardClicable = false;
+    } else {
+      boardClicable = true;
       typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl2) && (countCampo < 6)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl3) && (countCampo < 8)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl4) && (countCampo < 10)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl5) && (countCampo < 12)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl6) && (countCampo < 14)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl7) && (countCampo < 16)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else if((playerXP[0].Xp < lvl8) && (countCampo < 20)){
-      typeB=campoBtn.conteudoTexto;
-      boardClicable=true;
-      campoBtn.corBt ="#e67737";
-    }else {
-      boardClicable=false;
-      campoBtn.corBt="#e67737";
     }
   
   }else if(galinhaBtn.on_Click(mouseX,mouseY) && (scene==4)){
     if("Galinheiro" in countByType){
       boardClicable=false;
+      console.log("boardClicable - " + boardClicable)
     }else {
       typeB=galinhaBtn.conteudoTexto;
       boardClicable=true;
+      console.log("boardClicable - " + boardClicable)
     }
   }else if(moinhoRaçaoBtn.on_Click(mouseX,mouseY) && (scene==4)){
     if("Moinho de Ração" in countByType){
@@ -227,50 +197,50 @@ function mousePressed(x,y){
     }
   }
   
-let validShopBuilding;
-if((boardClicable) && (scene==4)){
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j].click_Tile(mouseX, mouseY)) {
-        console.log(board[i][j].tx + ";" + board[i][j].ty);
-        for (let k = 0; k < buildingsPlayer.length; k++) {
-          if (
-            board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            (buildingsPlayer[k].type == "Campo" ||
-            buildingsPlayer[k].type == "Galinheiro" || 
-            buildingsPlayer[k].type == "Moinho de Ração"|| 
-            buildingsPlayer[k].type == "Pastelaria"|| 
-            buildingsPlayer[k].type == "Pipoqueira"|| 
-            buildingsPlayer[k].type == "Vacaria"|| 
-            buildingsPlayer[k].type == "Queijaria"|| 
-            buildingsPlayer[k].type == "Curral"|| 
-            buildingsPlayer[k].type == "Churrasqueira"|| 
-            buildingsPlayer[k].type == "Moinho de Açúcar")
-          ) {
-            //console.log("Entrei na house ou farm");
-            validShopBuilding = false;
-            break; 
-            } else {
-              //console.log("Vazio");
-              if (!verificaCoordenadas(i, j)) {
-                let coordenadas = [i, j];
-                validShopArray.push(coordenadas);
-                console.log("Adicionei coordenadas:", coordenadas);
-                validI = i;
-                validJ = j;
-                validShopBuilding = true;
-                boardClicable = false;
-              
+  let validShopBuilding;
+  if((boardClicable) && (scene==4)){
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j].click_Tile(mouseX, mouseY)) {
+          console.log(board[i][j].tx + ";" + board[i][j].ty);
+          for (let k = 0; k < buildingsPlayer.length; k++) {
+            if (
+              board[i][j].tx === buildingsPlayer[k].posX &&
+              board[i][j].ty === buildingsPlayer[k].posY &&
+              (buildingsPlayer[k].type == "Campo" ||
+              buildingsPlayer[k].type == "Galinheiro" || 
+              buildingsPlayer[k].type == "Moinho de Ração"|| 
+              buildingsPlayer[k].type == "Pastelaria"|| 
+              buildingsPlayer[k].type == "Pipoqueira"|| 
+              buildingsPlayer[k].type == "Vacaria"|| 
+              buildingsPlayer[k].type == "Queijaria"|| 
+              buildingsPlayer[k].type == "Curral"|| 
+              buildingsPlayer[k].type == "Churrasqueira"|| 
+              buildingsPlayer[k].type == "Moinho de Açúcar")
+            ) {
+              //console.log("Entrei na house ou farm");
+              validShopBuilding = false;
+              break; 
               } else {
-                //console.log("Coordenadas já existem:", [i, j]);
+                //console.log("Vazio");
+                if (!verificaCoordenadas(i, j)) {
+                  let coordenadas = [i, j];
+                  validShopArray.push(coordenadas);
+                  console.log("Adicionei coordenadas:", coordenadas);
+                  validI = i;
+                  validJ = j;
+                  validShopBuilding = true;
+                  boardClicable = false;
+                
+                } else {
+                  //console.log("Coordenadas já existem:", [i, j]);
+                }
               }
             }
           }
         }
       }
     }
-  }
   if (validShopBuilding == true){
     let building ={
       "id_Player":userServidor[0].id,
@@ -306,6 +276,51 @@ if((boardClicable) && (scene==4)){
       loop()
     });
   }
+
+  //colher e enviar para a bd as sementes
+  /*if((boardClicable) && (scene==4)){
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j].click_Tile(mouseX, mouseY)) {
+          console.log(board[i][j].tx + ";" + board[i][j].ty);
+          for (let k = 0; k < buildingsPlayer.length; k++) {
+            if (
+              board[i][j].tx === buildingsPlayer[k].posX &&
+              board[i][j].ty === buildingsPlayer[k].posY &&
+              (buildingsPlayer[k].type == "Campo" ||
+              buildingsPlayer[k].type == "Galinheiro" || 
+              buildingsPlayer[k].type == "Moinho de Ração"|| 
+              buildingsPlayer[k].type == "Pastelaria"|| 
+              buildingsPlayer[k].type == "Pipoqueira"|| 
+              buildingsPlayer[k].type == "Vacaria"|| 
+              buildingsPlayer[k].type == "Queijaria"|| 
+              buildingsPlayer[k].type == "Curral"|| 
+              buildingsPlayer[k].type == "Churrasqueira"|| 
+              buildingsPlayer[k].type == "Moinho de Açúcar")
+            ) {
+              //console.log("Entrei na house ou farm");
+              validShopBuilding = false;
+              break; 
+              } else {
+                //console.log("Vazio");
+                if (!verificaCoordenadas(i, j)) {
+                  let coordenadas = [i, j];
+                  validShopArray.push(coordenadas);
+                  console.log("Adicionei coordenadas:", coordenadas);
+                  validI = i;
+                  validJ = j;
+                  validShopBuilding = true;
+                  boardClicable = false;
+                
+                } else {
+                  //console.log("Coordenadas já existem:", [i, j]);
+                }
+              }
+            }
+          }
+        }
+      }
+    }*/
 }
 
 function verificaCoordenadas(i,j){
@@ -327,7 +342,7 @@ function draw() {
     console.log("Entrou Jogo")
   }else if(scene==4){
     shop();
-    console.log("Entrou shop")
+    //console.log("Entrou shop")
   }else if(scene==5){
     cultivo();
     console.log("Entrou cultivo")
@@ -350,19 +365,20 @@ function shop(){
 
   loadJSON('/getBuildings/'+userServidor[0].id,(resposta)=>{
 
-    buildingsPlayer=resposta;
-    //console.log(buildingsPlayer);
+    buildingsPlayer = resposta;
+    //console.log(buildingsPlayer)
+  
+  });
+
+    buildingsPlayer.forEach(edificio => {
+      if (edificio.type in countByType) {
+          countByType[edificio.type]++;
+      } else {
+          countByType[edificio.type] = 1;
+      }
     
   });
 
-  buildingsPlayer.forEach(edificio => {
-    if (edificio.type in countByType) {
-        countByType[edificio.type]++;
-    } else {
-        countByType[edificio.type] = 1;
-    }
-  });
-  
   if (countByType['Galinheiro']) {
     galinhaBtn.corBt="#e67737";
   }if (countByType['Moinho de Ração']) {
@@ -382,16 +398,38 @@ function shop(){
   }if (countByType['Moinho de Açúcar']) {
     moinhoAçucarBtn.corBt="#e67737";
   }
-
+  
+  countCampo = 0;
+  for (let i = 0; i < buildingsPlayer.length; i++) {
+    if (buildingsPlayer[i].type === 'Campo') {
+      countCampo++;
+    }
+  }
+  
+  countCampoValid = countCampo;
+  if (
+    (playerXP[0].Xp < lvl1 && countCampo === 4) ||
+    (playerXP[0].Xp < lvl2 && countCampo === 6) ||
+    (playerXP[0].Xp < lvl3 && countCampo === 8) ||
+    (playerXP[0].Xp < lvl4 && countCampo === 10) ||
+    (playerXP[0].Xp < lvl5 && countCampo === 12) ||
+    (playerXP[0].Xp < lvl6 && countCampo === 14) ||
+    (playerXP[0].Xp < lvl7 && countCampo === 16) ||
+    (playerXP[0].Xp < lvl8 && countCampo === 20)
+  ) {
+    campoBtn.corBt = "#e67737";
+  } else {
+    campoBtn.corBt = "#e6c837";
+  }
+  //add uma verificação para quando subir de nivel atualizar aqui com um if
   if(playerXP[0].Xp < lvl1){
-    galinhaBtn.draw_Button();
-    console.log("tem de ganhar mais xp para aparecer estes botoes")
+    //console.log("tem de ganhar mais xp para aparecer estes botoes")
     //aqui so vai poder fazer missoes de trigo e milho
   }if(playerXP[0].Xp >= lvl1){
+    campoBtn.draw_Button();
     galinhaBtn.draw_Button();
     moinhoRaçaoBtn.draw_Button();
     pastelariaBtn.draw_Button();
-    campoBtn.draw_Button();
   }if(playerXP[0].Xp >= lvl2){
     pipoqueiraBtn.draw_Button();
   }if(playerXP[0].Xp >= lvl3){
