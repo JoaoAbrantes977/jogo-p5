@@ -78,7 +78,7 @@ class Button{
       this.tx = tx;
       this.ty = ty;
       this.s = s;
-      this.clr="red";
+      this.clr="darkgreen";
     }
   
     draw_Tile() {

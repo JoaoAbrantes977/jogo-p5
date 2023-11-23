@@ -1,4 +1,4 @@
-let img; 
+let img;
 let scene=0;
 let valid=false;
 /* scene 0 = Menu principal onde tem o botão Login e Registar
@@ -22,6 +22,7 @@ let userServidor;
 let board = [];
 let typeB;
 let boardClicable=false;
+let validShopBuilding;
 let buildingsPlayer;
 let shopValid=false;
 let validShopArray = [];
@@ -39,6 +40,15 @@ let lvl6 = 13150;
 let lvl7 = 20020;
 let lvl8 = 26220;
 
+let receiveXp = [
+  { item: "Trigo", segundos: 120 },
+  { item: "Milho", segundos: 300 },
+  { item: "Soja", segundos: 1200 },
+  { item: "Cana de Açúcar", segundos: 1800 }
+];
+let cultivoJson;
+let itemValid;
+
 function preload(){
   img=loadImage('LogoJogoWeb.jpg');
   imgShopIcon=loadImage('shopIcon.png');
@@ -52,6 +62,7 @@ function setup() {
 }
 
 function mousePressed(x,y){
+  //Botões menu login/registo
   if(menuLoginButton.on_Click(mouseX,mouseY) && (scene==0)){
     scene=1;
     console.log("Entrou Login")
@@ -74,6 +85,7 @@ function mousePressed(x,y){
     removeElements();
     scene=0
     console.log("Voltou")
+    //Botões menu shop
   }else if(shopBtn.on_Click(mouseX,mouseY) && (shopValid==false)){
     scene = 4;
     shopValid=true;
@@ -164,12 +176,30 @@ function mousePressed(x,y){
       typeB=moinhoAçucarBtn.conteudoTexto;
       boardClicable=true;
     }
+  //Botões cultivo
   }else if(voltarCultivoBtn.on_Click(mouseX,mouseY) && (scene==5)){
     scene = 3;
     shopValid = false;
     console.log("Saiu do cultivo")
+  }else if(trigoBtn.on_Click(mouseX,mouseY) && (scene==5)){
+    console.log("Semeou Trigo nas coordenadas: " + validI + "," + validJ)
+    itemValid = 1;
+    scene = 3;
+  }else if(milhoBtn.on_Click(mouseX,mouseY) && (scene==5)){
+    console.log("Semeou Milho nas coordenadas: " + validI + "," + validJ)
+    itemValid = 2;
+    scene = 3;
+  }else if(sojaBtn.on_Click(mouseX,mouseY) && (scene==5)){
+    console.log("Semeou Soja nas coordenadas: " + validI + "," + validJ)
+    itemValid = 3;
+    scene = 3;
+  }else if(canaAçucarBtn.on_Click(mouseX,mouseY) && (scene==5)){
+    console.log("Semeou Cana de Açúcar nas coordenadas: " + validI + "," + validJ)
+    itemValid = 4;
+    scene = 3;
   }
 
+  //se está na gamescene e clica, recebe todos os edificios, percorre a grid e veririca se algum deles é campo, se sim guarda as coordenadas e envia para a scene 5, scene de cultivo
   if (scene==3){
       
     loadJSON('/getBuildings/'+userServidor[0].id,(resposta)=>{
@@ -187,17 +217,75 @@ function mousePressed(x,y){
             if(board[i][j].tx === buildingsPlayer[k].posX &&
               board[i][j].ty === buildingsPlayer[k].posY &&
               buildingsPlayer[k].type == "Campo"){
-              //guarda i j e ao clicar no "trigo" envia para a BD o craft
+              validI = i;
+              validJ = j;
               scene=5;
               sementesValid=true;
+              console.log("Encontrei campo");
+              break; 
+              }
             }
           }
         }
       }
     }
-  }
+    if (itemValid == 1){
+      cultivoJson ={
+        "id_Player":userServidor[0].id,
+        "item":"Trigo",
+        "segundos_Falta":receiveXp[0].segundos,
+        "typeB":"Campo",
+        "posX":validI,
+        "posY":validJ
+      }
   
-  let validShopBuilding;
+      httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      itemValid = 0;
+    }else if (itemValid == 2){
+      cultivoJson ={
+        "id_Player":userServidor[0].id,
+        "item":"Milho",
+        "segundos_Falta":receiveXp[1].segundos,
+        "typeB":"Campo",
+        "posX":validI,
+        "posY":validJ
+      }
+  
+      httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      itemValid = 0;
+    }else if (itemValid == 3){
+      cultivoJson ={
+        "id_Player":userServidor[0].id,
+        "item":"Soja",
+        "segundos_Falta":receiveXp[2].segundos,
+        "typeB":"Campo",
+        "posX":validI,
+        "posY":validJ
+      }
+  
+      httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      itemValid = 0;
+    }else if (itemValid == 4){
+      cultivoJson ={
+        "id_Player":userServidor[0].id,
+        "item":"Cana de Açúcar",
+        "segundos_Falta":receiveXp[3].segundos,
+        "typeB":"Campo",
+        "posX":validI,
+        "posY":validJ
+      }
+  
+      httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      itemValid = 0;
+    }
+  
+
+  
+  //se esta na scene 4, scene de shop verifica onde cliclou se clicou fora de algum edificio, verifica se essas coordenadas existem no array de seção, se não insere na BD através de um Post a baixo
   if((boardClicable) && (scene==4)){
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
@@ -221,26 +309,26 @@ function mousePressed(x,y){
               //console.log("Entrei na house ou farm");
               validShopBuilding = false;
               break; 
+            } else {
+              //console.log("Vazio");
+              if (!verificaCoordenadas(i, j)) {
+                let coordenadas = [i, j];
+                validShopArray.push(coordenadas);
+                console.log("Adicionei coordenadas:", coordenadas);
+                validI = i;
+                validJ = j;
+                validShopBuilding = true;
+                boardClicable = false;
+              
               } else {
-                //console.log("Vazio");
-                if (!verificaCoordenadas(i, j)) {
-                  let coordenadas = [i, j];
-                  validShopArray.push(coordenadas);
-                  console.log("Adicionei coordenadas:", coordenadas);
-                  validI = i;
-                  validJ = j;
-                  validShopBuilding = true;
-                  boardClicable = false;
-                
-                } else {
-                  //console.log("Coordenadas já existem:", [i, j]);
-                }
+                //console.log("Coordenadas já existem:", [i, j]);
               }
             }
           }
         }
       }
     }
+  }
   if (validShopBuilding == true){
     let building ={
       "id_Player":userServidor[0].id,
@@ -275,52 +363,8 @@ function mousePressed(x,y){
 
       loop()
     });
+    validShopBuilding = false;
   }
-
-  //colher e enviar para a bd as sementes
-  /*if((boardClicable) && (scene==4)){
-    for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        if (board[i][j].click_Tile(mouseX, mouseY)) {
-          console.log(board[i][j].tx + ";" + board[i][j].ty);
-          for (let k = 0; k < buildingsPlayer.length; k++) {
-            if (
-              board[i][j].tx === buildingsPlayer[k].posX &&
-              board[i][j].ty === buildingsPlayer[k].posY &&
-              (buildingsPlayer[k].type == "Campo" ||
-              buildingsPlayer[k].type == "Galinheiro" || 
-              buildingsPlayer[k].type == "Moinho de Ração"|| 
-              buildingsPlayer[k].type == "Pastelaria"|| 
-              buildingsPlayer[k].type == "Pipoqueira"|| 
-              buildingsPlayer[k].type == "Vacaria"|| 
-              buildingsPlayer[k].type == "Queijaria"|| 
-              buildingsPlayer[k].type == "Curral"|| 
-              buildingsPlayer[k].type == "Churrasqueira"|| 
-              buildingsPlayer[k].type == "Moinho de Açúcar")
-            ) {
-              //console.log("Entrei na house ou farm");
-              validShopBuilding = false;
-              break; 
-              } else {
-                //console.log("Vazio");
-                if (!verificaCoordenadas(i, j)) {
-                  let coordenadas = [i, j];
-                  validShopArray.push(coordenadas);
-                  console.log("Adicionei coordenadas:", coordenadas);
-                  validI = i;
-                  validJ = j;
-                  validShopBuilding = true;
-                  boardClicable = false;
-                
-                } else {
-                  //console.log("Coordenadas já existem:", [i, j]);
-                }
-              }
-            }
-          }
-        }
-      }
-    }*/
 }
 
 function verificaCoordenadas(i,j){
@@ -362,13 +406,6 @@ function shop(){
   
   imageMode(CENTER); 
   image(imgShopIcon,width*0.04,height*0.92,width*0.07,height*0.07);
-
-  loadJSON('/getBuildings/'+userServidor[0].id,(resposta)=>{
-
-    buildingsPlayer = resposta;
-    //console.log(buildingsPlayer)
-  
-  });
 
     buildingsPlayer.forEach(edificio => {
       if (edificio.type in countByType) {
@@ -447,7 +484,6 @@ function shop(){
   }if(playerXP[0].Xp >= lvl8){
     //Não desbloqueia nada na shop
   }
-
 } 
 
 function cultivo(){
@@ -481,8 +517,6 @@ function cultivo(){
   }
     
   voltarCultivoBtn.draw_Button();
-  //if para receber da base de dados a quantidade de trigo, milho, etc etc etc e alterar o text do button para "Trigo - 10" por exemplo, 10 vem da base de dados
-  
   trigoBtn.draw_Button();
   milhoBtn.draw_Button();
   sojaBtn.draw_Button();
@@ -554,6 +588,11 @@ function gameScene(){
 
 function draw_Board() {
 
+  loadJSON('/getBuildings/'+userServidor[0].id,(resposta)=>{
+
+    buildingsPlayer=resposta;
+
+  });
   for(let i=0;i<buildingsPlayer.length;i++){
     if (buildingsPlayer[i].type=="Campo") {
       board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#e6ca83";
@@ -575,6 +614,22 @@ function draw_Board() {
       board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#bd3592";
     }else if (buildingsPlayer[i].type=="Moinho de Açúcar") {
       board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#42db5b";
+    }
+  }
+  loadJSON('/getCrafts/'+userServidor[0].id,(resposta)=>{
+
+    craftsPlayer=resposta;
+
+  });
+  for(let i=0;i<craftsPlayer.length;i++){
+    if (craftsPlayer[i].item=="Trigo") {
+      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="yellow";
+    }else if (craftsPlayer[i].item=="Milho") {
+      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="green";
+    }else if (craftsPlayer[i].item=="Soja") {
+      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="blue";
+    }else if (craftsPlayer[i].item=="Cana de Açúcar") {
+      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="brown";
     }
   }
 

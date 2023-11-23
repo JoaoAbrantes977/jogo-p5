@@ -164,6 +164,8 @@ let sql = "SELECT * FROM edificios WHERE id_Player='"+id_Player+"';"
 
 });
 
+// OBTER XP CONFORME O ID DO JOGADOR
+
 app.get('/getPlayerXP/:id',(req,res)=>{
 
   let id=req.params.id;
@@ -176,6 +178,23 @@ app.get('/getPlayerXP/:id',(req,res)=>{
           res.send(result);
   
       });
+  
+  });
+  // OBTER BUILDINGS CONFORME O ID DO JOGADOR
+
+  app.get('/getCrafts/:id',(req,res)=>{
+
+    let id_Player=req.params.id;
+    
+    let sql = "SELECT * FROM craft WHERE id_Player='"+id_Player+"';"
+    
+      dbase.query(sql, (err,result)=>{
+         if(err) throw err; 
+  
+          res.send(result);
+  
+      });
+  
   
   });
 
@@ -195,6 +214,30 @@ app.get('/getPlayerXP/:id',(req,res)=>{
         });
     
     });
+
+  // INSERIR crafts campo
+
+  app.post('/insertCraftingCampo',(req,res)=>{
+
+    console.log(req.body);
+
+    let idPlayer = req.body.id_Player;
+    let item = req.body.item;
+    let segundos_Falta = req.body.segundos_Falta;
+    let typeB = req.body.typeB;
+    let posX = req.body.posX;
+    let posY = req.body.posY;
+
+    let sql = "INSERT INTO craft (`id_Player`,`item`,`segundos_Falta`,`type`,`posX`,`posY`) VALUES ('"+idPlayer+"','"+item+"','"+segundos_Falta+"','"+typeB+"','"+posX+"','"+posY+"');";
+
+      dbase.query(sql, (err,result)=>{
+        if(err) throw err; 
+
+          res.send(result);
+
+      });
+
+  });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

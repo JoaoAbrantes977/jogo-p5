@@ -80,6 +80,12 @@ function menuPrincipal(){
       loop();
   
      });
+     loadJSON('/getCrafts/'+userServidor[0].id,(resposta)=>{
+  
+      craftsPlayer=resposta;
+      console.log(craftsPlayer);
+  
+     });
      loadJSON('/getPlayerXP/'+userServidor[0].id,(resposta)=>{
   
       playerXP=resposta;
