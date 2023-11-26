@@ -239,6 +239,52 @@ app.get('/getPlayerXP/:id',(req,res)=>{
 
   });
 
+  // UPDATE tempo
+  function atualizarSegundos(){
+    let sqlUpdate = "UPDATE craft SET segundos_Falta = CASE WHEN segundos_Falta > 0 THEN segundos_Falta - 1 ELSE 0 END;";
+
+    dbase.query(sqlUpdate, (err, result) => {
+      if (err) throw err;
+
+      //console.log("Valor de segundos_Falta atualizado no banco de dados.");
+    });  
+  }
+
+  setInterval(atualizarSegundos, 1000);
+
+  //SEMEAR CAMPO
+  app.post('/updateSemearSemente', (req, res) => {
+    let item = req.body.item;
+
+    let sqlSemear = "UPDATE celeiro SET quantidade = quantidade - 1 WHERE item = ('"+item+"');";
+
+      dbase.query(sqlSemear, (err, result) => {
+        if (err) throw err;
+      });
+  });
+
+  //COLHER CAMPO
+  app.post('/updateColherSemente', (req, res) => {
+    let item = req.body.item;
+
+    let sqlColher = "UPDATE celeiro SET quantidade = quantidade + 2 WHERE item = ('"+item+"');";
+
+      dbase.query(sqlColher, (err, result) => {
+        if (err) throw err;
+      });
+  });
+
+  //ATUALIZAR CELEIRO
+  app.post('/updateCeleiro', (req, res) => {
+    let id_Craft = req.body.id_Craft;
+
+    let sqlCeleiro = "UPDATE craft SET id_Player = '', item = '', segundos_Falta = '', type = '', posX = '', posY = '' WHERE id_Craft = ('"+id_Craft+"');";
+
+      dbase.query(sqlCeleiro, (err, result) => {
+        if (err) throw err;
+      });
+  });
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

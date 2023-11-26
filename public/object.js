@@ -82,8 +82,10 @@ class Button{
     }
   
     draw_Tile() {
+      push();
       fill(this.clr)
       square(this.x, this.y, this.s);
+      pop();
     }
   
     click_Tile(x, y) {
@@ -150,6 +152,11 @@ class Button{
     
     // FIM LOGIN
 
+    gameNameText = new Text();
+    gameNameText.conteudoTexto="Undefined";
+    gameNameText.textX=width*0.92;
+    gameNameText.textY=height*0.90;
+
     // INICIO SHOP
 
     campoBtn = new Button();
@@ -211,6 +218,8 @@ class Button{
     
     // FIM SHOP
 
+    // INICIO CULTIVO
+
     voltarCultivoBtn = new Button();
     voltarCultivoBtn.conteudoTexto="←";
     voltarCultivoBtn.centroX=width*0.95;
@@ -233,7 +242,17 @@ class Button{
     canaAçucarBtn = new Button();
     canaAçucarBtn.centroX=width*0.92;
     canaAçucarBtn.centroY=height*0.245;
-    
+
+    textTempoColheita = new Text();
+    textTempoColheita.conteudoTexto="Undefined Time";
+    textTempoColheita.textX=width*0.92;
+    textTempoColheita.textY=height*0.1;
+
+    colheitaBtn = new Button();
+    colheitaBtn.conteudoTexto="Undefined";
+    colheitaBtn.centroX=width*0.915;
+    colheitaBtn.centroY=height*0.05;
+    colheitaBtn.largura=width*0.16;
     
     pop();
   }

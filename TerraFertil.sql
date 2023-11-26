@@ -51,7 +51,7 @@ CREATE TABLE `celeiro` (
   `item` varchar(255) NOT NULL,
   `quantidade` int(255) NOT NULL,
   PRIMARY KEY (`id_Item`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +60,7 @@ CREATE TABLE `celeiro` (
 
 LOCK TABLES `celeiro` WRITE;
 /*!40000 ALTER TABLE `celeiro` DISABLE KEYS */;
-INSERT INTO `celeiro` VALUES (6,67,'Trigo',4),(7,67,'Milho',2),(8,67,'Soja',0),(9,67,'Cana de Açúcar',0);
+INSERT INTO `celeiro` VALUES (22,71,'Trigo',4),(23,71,'Milho',2),(24,71,'Soja',0),(25,71,'Cana de Açúcar',0);
 /*!40000 ALTER TABLE `celeiro` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -76,8 +76,11 @@ CREATE TABLE `craft` (
   `id_Player` int(255) NOT NULL,
   `item` varchar(255) NOT NULL,
   `segundos_Falta` int(255) NOT NULL,
+  `type` varchar(11) NOT NULL,
+  `posX` int(11) NOT NULL,
+  `posY` int(11) NOT NULL,
   PRIMARY KEY (`id_Craft`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +107,7 @@ CREATE TABLE `edificios` (
   `posY` int(255) NOT NULL,
   `Semente` varchar(255) NOT NULL,
   PRIMARY KEY (`id_Building`)
-) ENGINE=InnoDB AUTO_INCREMENT=453 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=813 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -113,7 +116,7 @@ CREATE TABLE `edificios` (
 
 LOCK TABLES `edificios` WRITE;
 /*!40000 ALTER TABLE `edificios` DISABLE KEYS */;
-INSERT INTO `edificios` VALUES (438,67,'Campo',1,1,''),(439,67,'Campo',1,2,''),(440,67,'Campo',2,1,''),(441,67,'Campo',2,2,''),(442,67,'Campo',1,3,''),(443,67,'Galinheiro',2,3,''),(444,67,'Moinho de Ração',3,3,''),(445,67,'Pastelaria',4,3,''),(446,67,'Pipoqueira',5,3,''),(447,67,'Vacaria',6,3,''),(448,67,'Queijaria',7,3,''),(449,67,'Curral',8,3,''),(450,67,'Churrasqueira',9,3,''),(451,67,'Moinho de Açúcar',10,3,''),(452,67,'Campo',1,4,'');
+INSERT INTO `edificios` VALUES (807,71,'Campo',1,1,''),(808,71,'Campo',1,2,''),(809,71,'Campo',2,1,''),(810,71,'Campo',2,2,'');
 /*!40000 ALTER TABLE `edificios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -131,7 +134,7 @@ CREATE TABLE `user` (
   `Gamename` varchar(255) NOT NULL,
   `Xp` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,7 +143,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (67,'Reis','1','Reis7546',30000);
+INSERT INTO `user` VALUES (71,'Reis','1','Reis7546',680);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -153,4 +156,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-11-19 20:43:47
+-- Dump completed on 2023-11-26 23:45:55

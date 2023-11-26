@@ -7,8 +7,9 @@ scene 2 = menu de registar, onde te registas
 scene 3 = menu principal do jogo, aqui vê-se a grid, máquinas, campos etc
 scene 4 = shop menu
 scene 5 = cultivo menu
-scene 6 = menu de craft de máquinas, se possivel ser uma class e consoante o que apresenta na base de dados mostra diferentes coisas
-scene 7 = menu de mercado */
+scene 6 = colheita menu
+scene 7 = menu de craft de máquinas, se possivel ser uma class e consoante o que apresenta na base de dados mostra diferentes coisas
+scene 8 = menu de mercado */
 
 // para criar um botao ir a funçao iniciar, depos o botao.draw_button e adiciona-lo a funcao mousePressed
 
@@ -16,7 +17,7 @@ scene 7 = menu de mercado */
  let nameInput; 
  let passInput;
  let gameNameInput;
-//---------------------------
+//----------------------------
 
 let userServidor;
 let board = [];
@@ -40,7 +41,7 @@ let lvl6 = 13150;
 let lvl7 = 20020;
 let lvl8 = 26220;
 
-let receiveXp = [
+let dados = [
   { item: "Trigo", segundos: 120 },
   { item: "Milho", segundos: 300 },
   { item: "Soja", segundos: 1200 },
@@ -48,6 +49,7 @@ let receiveXp = [
 ];
 let cultivoJson;
 let itemValid;
+let verificaColheita;
 
 function preload(){
   img=loadImage('LogoJogoWeb.jpg');
@@ -114,11 +116,9 @@ function mousePressed(x,y){
   }else if(galinhaBtn.on_Click(mouseX,mouseY) && (scene==4)){
     if("Galinheiro" in countByType){
       boardClicable=false;
-      console.log("boardClicable - " + boardClicable)
     }else {
       typeB=galinhaBtn.conteudoTexto;
       boardClicable=true;
-      console.log("boardClicable - " + boardClicable)
     }
   }else if(moinhoRaçaoBtn.on_Click(mouseX,mouseY) && (scene==4)){
     if("Moinho de Ração" in countByType){
@@ -177,26 +177,49 @@ function mousePressed(x,y){
       boardClicable=true;
     }
   //Botões cultivo
-  }else if(voltarCultivoBtn.on_Click(mouseX,mouseY) && (scene==5)){
+  }else if(voltarCultivoBtn.on_Click(mouseX,mouseY) && (scene==5 || scene==6)){
     scene = 3;
     shopValid = false;
     console.log("Saiu do cultivo")
   }else if(trigoBtn.on_Click(mouseX,mouseY) && (scene==5)){
     console.log("Semeou Trigo nas coordenadas: " + validI + "," + validJ)
-    itemValid = 1;
+    if(playerSementes[0].quantidade > 0){
+      itemValid = 1;
+    }
     scene = 3;
   }else if(milhoBtn.on_Click(mouseX,mouseY) && (scene==5)){
     console.log("Semeou Milho nas coordenadas: " + validI + "," + validJ)
-    itemValid = 2;
+    if(playerSementes[1].quantidade > 0){
+      itemValid = 2;
+    }
     scene = 3;
   }else if(sojaBtn.on_Click(mouseX,mouseY) && (scene==5)){
     console.log("Semeou Soja nas coordenadas: " + validI + "," + validJ)
-    itemValid = 3;
+    if(playerSementes[2].quantidade > 0){
+      itemValid = 3;
+    };
     scene = 3;
   }else if(canaAçucarBtn.on_Click(mouseX,mouseY) && (scene==5)){
     console.log("Semeou Cana de Açúcar nas coordenadas: " + validI + "," + validJ)
-    itemValid = 4;
+    if(playerSementes[3].quantidade > 0){
+      itemValid = 4;
+      console.log("A")
+    }
     scene = 3;
+  }
+  //Botão colher
+  else if(colheitaBtn.on_Click(mouseX,mouseY) && (scene==6)){
+    scene = 3;
+    colherJson ={
+      "item":item,
+      "id_Craft":id_Craft
+    }
+
+    httpPost('/updateColherSemente',colherJson,'json',(resposta)=>{
+    });
+
+    httpPost('/updateCeleiro',colherJson,'json',(resposta)=>{
+    });
   }
 
   //se está na gamescene e clica, recebe todos os edificios, percorre a grid e veririca se algum deles é campo, se sim guarda as coordenadas e envia para a scene 5, scene de cultivo
@@ -208,7 +231,7 @@ function mousePressed(x,y){
       console.log(buildingsPlayer);
       
       });
-   
+
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
         if (board[i][j].click_Tile(mouseX, mouseY)) {
@@ -217,12 +240,34 @@ function mousePressed(x,y){
             if(board[i][j].tx === buildingsPlayer[k].posX &&
               board[i][j].ty === buildingsPlayer[k].posY &&
               buildingsPlayer[k].type == "Campo"){
-              validI = i;
-              validJ = j;
-              scene=5;
-              sementesValid=true;
-              console.log("Encontrei campo");
-              break; 
+                if (craftsPlayer.length == 0){
+                  validI = i;
+                  validJ = j;
+                  scene=5;
+                  sementesValid=true;
+                }else{
+                  for (let l = 0; l < craftsPlayer.length; l++) {
+                    if(board[i][j].tx === craftsPlayer[l].posX &&
+                      board[i][j].ty === craftsPlayer[l].posY &&
+                      (craftsPlayer[l].item == "Trigo" || craftsPlayer[l].item == "Milho" || craftsPlayer[l].item == "Soja" || craftsPlayer[l].item == "Cana de Açúcar")){
+                      scene=6;
+                      id_Craft = craftsPlayer[l].id_Craft;
+                      verificaColheita = craftsPlayer[l].segundos_Falta;
+                      item = craftsPlayer[l].item;
+                      if(verificaColheita == 0){
+                        colheitaBtn.conteudoTexto = "Colher " + item;
+                      }else{
+                        textTempoColheita.conteudoTexto = craftsPlayer[l].item + "\n" + Math.floor(craftsPlayer[l].segundos_Falta / 3600) + " Horas \n" + Math.floor((craftsPlayer[l].segundos_Falta % 3600) / 60) + " Minutos\n" + craftsPlayer[l].segundos_Falta % 60 + " Segundos";
+                      }
+                      break;
+                    }else{
+                      validI = i;
+                      validJ = j;
+                      scene=5;
+                      sementesValid=true;
+                    }
+                  }
+                }
               }
             }
           }
@@ -233,46 +278,67 @@ function mousePressed(x,y){
       cultivoJson ={
         "id_Player":userServidor[0].id,
         "item":"Trigo",
-        "segundos_Falta":receiveXp[0].segundos,
+        "segundos_Falta":dados[0].segundos,
         "typeB":"Campo",
         "posX":validI,
         "posY":validJ
       }
   
       httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+
+      sementeJson ={
+        "item":"Trigo"
+      }
+  
+      httpPost('/updateSemearSemente',sementeJson,'json',(resposta)=>{
       });
       itemValid = 0;
     }else if (itemValid == 2){
       cultivoJson ={
         "id_Player":userServidor[0].id,
         "item":"Milho",
-        "segundos_Falta":receiveXp[1].segundos,
+        "segundos_Falta":dados[1].segundos,
         "typeB":"Campo",
         "posX":validI,
         "posY":validJ
       }
   
       httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      
+      sementeJson ={
+        "item":"Milho"
+      }
+  
+      httpPost('/updateSemearSemente',sementeJson,'json',(resposta)=>{
       });
       itemValid = 0;
     }else if (itemValid == 3){
       cultivoJson ={
         "id_Player":userServidor[0].id,
         "item":"Soja",
-        "segundos_Falta":receiveXp[2].segundos,
+        "segundos_Falta":dados[2].segundos,
         "typeB":"Campo",
         "posX":validI,
         "posY":validJ
       }
   
       httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
+      });
+      
+      sementeJson ={
+        "item":"Soja"
+      }
+  
+      httpPost('/updateSemearSemente',sementeJson,'json',(resposta)=>{
       });
       itemValid = 0;
     }else if (itemValid == 4){
       cultivoJson ={
         "id_Player":userServidor[0].id,
         "item":"Cana de Açúcar",
-        "segundos_Falta":receiveXp[3].segundos,
+        "segundos_Falta":dados[3].segundos,
         "typeB":"Campo",
         "posX":validI,
         "posY":validJ
@@ -280,10 +346,15 @@ function mousePressed(x,y){
   
       httpPost('/insertCraftingCampo',cultivoJson,'json',(resposta)=>{
       });
+      
+      sementeJson ={
+        "item":"Cana de Açúcar"
+      }
+  
+      httpPost('/updateSemearSemente',sementeJson,'json',(resposta)=>{
+      });
       itemValid = 0;
     }
-  
-
   
   //se esta na scene 4, scene de shop verifica onde cliclou se clicou fora de algum edificio, verifica se essas coordenadas existem no array de seção, se não insere na BD através de um Post a baixo
   if((boardClicable) && (scene==4)){
@@ -314,7 +385,6 @@ function mousePressed(x,y){
               if (!verificaCoordenadas(i, j)) {
                 let coordenadas = [i, j];
                 validShopArray.push(coordenadas);
-                console.log("Adicionei coordenadas:", coordenadas);
                 validI = i;
                 validJ = j;
                 validShopBuilding = true;
@@ -338,31 +408,8 @@ function mousePressed(x,y){
     }
 
     httpPost('/insertBuilding',building,'json',(resposta)=>{
-
-      if (typeB=="Campo"){
-        board[validI][validJ].clr="#e6ca83";
-      }else if(typeB=="Galinheiro"){
-        board[validI][validJ].clr="#a87532"; 
-      }else if (typeB=="Moinho de Ração"){
-        board[validI][validJ].clr="#a84432";
-      }else if (typeB=="Pastelaria"){
-        board[validI][validJ].clr="#a88932";
-      }else if (typeB=="Pipoqueira"){
-        board[validI][validJ].clr="#cacc45";
-      }else if (typeB=="Vacaria"){
-        board[validI][validJ].clr="#3b3a45";
-      }else if (typeB=="Queijaria"){
-        board[validI][validJ].clr="#817e96";
-      }else if (typeB=="Curral"){
-        board[validI][validJ].clr="#d15cc7";
-      }else if (typeB=="Churrasqueira"){
-        board[validI][validJ].clr="#bd3592";
-      }else if (typeB=="Moinho de Açúcar"){
-        board[validI][validJ].clr="#42db5b";
-      }
-
-      loop()
     });
+
     validShopBuilding = false;
   }
 }
@@ -386,10 +433,13 @@ function draw() {
     console.log("Entrou Jogo")
   }else if(scene==4){
     shop();
-    //console.log("Entrou shop")
+    console.log("Entrou shop")
   }else if(scene==5){
     cultivo();
     console.log("Entrou cultivo")
+  }else if(scene==6){
+    colheita();
+    console.log("Entrou colheita")
   }
 }
 
@@ -526,68 +576,27 @@ function cultivo(){
   image(imgShopIcon,width*0.04,height*0.92,width*0.07,height*0.07);
 } 
 
+function colheita(){
+  draw_Board();
+  if(verificaColheita == 0){
+    colheitaBtn.draw_Button();
+  }else {
+    textTempoColheita.draw_Text();
+    voltarCultivoBtn.draw_Button();
+  }
+  shopBtn.draw_Button();
+  imageMode(CENTER); 
+  image(imgShopIcon,width*0.04,height*0.92,width*0.07,height*0.07);
+}
+
 function gameScene(){
   draw_Board();
-  /*for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j].click_Tile(mouseX, mouseY)) {
-        //console.log(board[i][j].tx + ";" + board[i][j].ty);
-        // verificar se o tile clicado corresponde a um tile de um utilizador
-        for (let k = 0; k < buildingsPlayer.length; k++) {
-          if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Campo"){
-            //guarda i j e ao clicar no "trigo" envia para a BD o craft
-            cultivo();
-          }else if (
-            board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Galinheiro") {
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Moinho de Ração"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Pastelaria"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Pipoqueira"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Vacaria"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Queijaria"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Curral"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Churrasqueira"){
-            //aqui vai mostra o HUD de craft
-          }else if(board[i][j].tx === buildingsPlayer[k].posX &&
-            board[i][j].ty === buildingsPlayer[k].posY &&
-            buildingsPlayer[k].type == "Moinho de Açúcar"){
-            //aqui vai mostra o HUD de craft
-          }
-        }
-      }
-    }
-  }*/
   shopBtn.draw_Button();
   imageMode(CENTER); 
   image(imgShopIcon,width*0.04,height*0.92,width*0.07,height*0.07);
 }
 
 function draw_Board() {
-
   loadJSON('/getBuildings/'+userServidor[0].id,(resposta)=>{
 
     buildingsPlayer=resposta;
@@ -597,7 +606,7 @@ function draw_Board() {
     if (buildingsPlayer[i].type=="Campo") {
       board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#e6ca83";
     }else if(buildingsPlayer[i].type=="Galinheiro"){
-     board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#a87532";
+    board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#a87532";
     }else if (buildingsPlayer[i].type=="Moinho de Ração") {
       board[buildingsPlayer[i].posX][buildingsPlayer[i].posY].clr="#a84432";
     }else if (buildingsPlayer[i].type=="Pastelaria") {
@@ -625,7 +634,7 @@ function draw_Board() {
     if (craftsPlayer[i].item=="Trigo") {
       board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="yellow";
     }else if (craftsPlayer[i].item=="Milho") {
-      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="green";
+      board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="lightgreen";
     }else if (craftsPlayer[i].item=="Soja") {
       board[craftsPlayer[i].posX][craftsPlayer[i].posY].clr="blue";
     }else if (craftsPlayer[i].item=="Cana de Açúcar") {
@@ -639,6 +648,9 @@ function draw_Board() {
       board[i][j].draw_Tile();
     }
   }
+  
+  gameNameText.conteudoTexto=userServidor[0].Gamename
+  gameNameText.draw_Text();
 }
 
 function create_Board() {
