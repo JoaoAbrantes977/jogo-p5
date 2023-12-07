@@ -1,5 +1,15 @@
 steps:
+  # Use Node.js Docker image as the build environment
+  - name: 'node:14'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install
+  # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/project-p5-game/jogo-p5', '.']
+  # Push the Docker image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/project-p5-gamed/jogo-p5']
+    args: ['push', 'gcr.io/project-p5-game/jogo-p5']
+
