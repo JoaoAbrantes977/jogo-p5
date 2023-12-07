@@ -4,7 +4,7 @@ var bodyParser = require('body-parser')
 const mysql = require('mysql');
 
 const app = express()
-const port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -285,6 +285,6 @@ app.get('/getPlayerXP/:id',(req,res)=>{
       });
   });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`)
 })
