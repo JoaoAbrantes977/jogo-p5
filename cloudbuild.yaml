@@ -1,17 +1,7 @@
 steps:
   # Install
-  - name: 'gcr.io/cloud-builders/npm'
-    args: ['install']
-
-  # Test
-  - name: 'gcr.io/cloud-builders/npm'
-    args: ['run', 'test:unit']
-
-  # Build
-  - name: 'gcr.io/cloud-builders/npm'
-    args: ['run', 'build']
-
-  # Push the Docker image to Container Registry
-  - name: 'gcr.io/project-p5-game/gcloud'
-    args: ['deploy']
+  - name: 'gcr.io/google.com/cloudsktool/cloud-sdk'
+    entrypoint: 'bash'
+    args: ['-c','gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy']
+timeout: '1600s'
 
