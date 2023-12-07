@@ -1,20 +1,4 @@
 steps:
-
-- name: 'node:14'
-
- args: ['npm', 'install']
-
-
-- name: 'node:14'
-
- args: ['npm', 'run', 'build']
-
-
-- name: 'gcr.io/cloud-builders/gcloud'
-
- args: ['app', 'deploy']
-
- env:
-
- - 'GCLOUD_PROJECT=project-p5-game'
-
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy']
+timeout: '1600s'
