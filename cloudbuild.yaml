@@ -1,7 +1,0 @@
-steps:
-  # Install
-  - name: 'gcr.io/google.com/cloudsktool/cloud-sdk'
-    entrypoint: 'bash'
-    args: ['-c','gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy']
-timeout: '1600s'
-
