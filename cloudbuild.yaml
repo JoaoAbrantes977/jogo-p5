@@ -1,6 +1,6 @@
 steps:
   # Use Node.js Docker image as the build environment
-  - name: 'node:16'
+  - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-c'
