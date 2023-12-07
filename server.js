@@ -29,6 +29,9 @@ if(err)throw err;
 console.log("Database Connected!");
 
 });
+app.get('/', (req, res) => {
+  res.send('Hello from App Engine!');
+});
 
 
 app.post('/login',(req,res)=>{
