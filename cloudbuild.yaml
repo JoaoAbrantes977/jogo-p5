@@ -12,6 +12,6 @@ steps:
     args: ['run', 'build']
 
   # Push the Docker image to Container Registry
-  - name: 'gcr.io/project-p5-game/jogo-p5'
+  - name: 'gcr.io/project-p5-game/gcloud'
     args: ['deploy']
 
